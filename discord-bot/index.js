@@ -5,6 +5,7 @@ const fs = require("fs");
 const client = new Discord.Client();
 
 const AudioMixer = require("audio-mixer");
+const { SilenceStream } = require("./silence_stream");
 
 client.on("ready", () => {
   console.log("I am ready!");
@@ -29,9 +30,22 @@ client.on("message", async message => {
           channels: 2,
           bitDepth: 16,
           sampleRate: 48000,
-          clearInterval: 250
+          clearInterval: 250,
+          highWaterMark: 1
         });
-        mixer.highWatermark = 512;
+        let silence = mixer.input({
+          channels: 1,
+          bitDepth: 16,
+          sampleRate: 48000,
+          volume: 100,
+          highWaterMark: 1
+        });
+        let silenceStream = new SilenceStream({
+          sampleRate: 48000,
+          bitDepth: 16,
+          highWaterMark: 1
+        });
+        silenceStream.pipe(silence);
 
         const connection = await message.member.voice.channel.join();
         // Connection is an instance of VoiceConnection
@@ -50,7 +64,6 @@ client.on("message", async message => {
         });
 
         const shotstream = ff.pipe();
-        // shotstream.highWatermark = 512;
         connection.play(shotstream, {
           type: "converted",
           highWaterMark: 1,
@@ -73,7 +86,8 @@ client.on("message", async message => {
               channels: 2,
               bitDepth: 16,
               sampleRate: 48000,
-              volume: 100
+              volume: 100,
+              highWaterMark: 1
             });
 
             audioStream.pipe(input);
