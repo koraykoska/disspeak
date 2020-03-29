@@ -5,7 +5,6 @@ const fs = require("fs");
 const client = new Discord.Client();
 
 const AudioMixer = require("audio-mixer");
-const shotmixer = require();
 const { SilenceStream } = require("./silence_stream");
 
 client.on("ready", () => {
