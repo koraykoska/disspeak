@@ -14,12 +14,12 @@ class MySHOT extends Duplex {
 			autoDestroy: true,
 			emitClose: true
 		});
+		this.shitarray = [];
 	}
-	const shitarray = []
 	_read(size) {
 		console.log("wanting read");
 		while(1) {
-			const shitchunk = shitarray.shift();
+			const shitchunk = this.shitarray.shift();
 			if(!shitchunk) {
 				return;
 			}
@@ -31,7 +31,7 @@ class MySHOT extends Duplex {
 
 	_write(chunk, encoding, callback) {
 		cosole.log("wanting write");
-		array.push(chunk);
+		this.shitarray.push(chunk);
 		callback(null);
 	}
 	_final(callback) {
