@@ -15,13 +15,23 @@ class MySHOT extends Duplex {
 			emitClose: true
 		});
 	}
+	const shitarray = []
 	_read(size) {
 		console.log("wanting read");
+		while(1) {
+			const shitchunk = shitarray.shift();
+			if(!shitchunk) {
+				return;
+			}
+			if(!this.push(shitchunk)) {
+				return;
+			}
+		}
 	}
 
 	_write(chunk, encoding, callback) {
 		cosole.log("wanting write");
-		this.push(chunk);
+		array.push(chunk);
 		callback(null);
 	}
 	_final(callback) {
