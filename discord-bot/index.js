@@ -1,11 +1,33 @@
 const ffmpeg = require("fluent-ffmpeg");
 const Discord = require("discord.js");
 const fs = require("fs");
-
+const { Duplex } = require('stream');
 const client = new Discord.Client();
 
 const AudioMixer = require("audio-mixer");
 const { SilenceStream } = require("./silence_stream");
+
+class MySHOT extends Duplex {
+	constructor({highWaterMark, ...options}) {
+		super({
+			highWaterMark,
+			autoDestroy: true,
+			emitClose: true
+		});
+	}
+	_read(size) {
+		console.log("wanting read");
+	}
+
+	_write(chunk, encoding, callback) {
+		cosole.log("wanting write");
+		this.push(chunk);
+		callback(null);
+	}
+	_final(callback) {
+		callback(null);
+	}
+}
 
 client.on("ready", () => {
 	console.log("I am ready!");
@@ -74,10 +96,11 @@ client.on("message", async message => {
 				const speakingUsers = {};
 				connection.on("speaking", (user, speaking) => {
 					if(!user || !user.id) {
+						console.log("nuller");
 						return;
 					}		
 					if (speaking.bitfield !== 0) {
-						console.log("ififififi");
+						console.log("started speaking ififififi");
 						console.log(speaking);
 
 						const audioStream = connection.receiver.createStream(user, {
@@ -85,18 +108,20 @@ client.on("message", async message => {
 							end: "silence"
 						});
 
-						let input = mixer.input({
+						/*let input = mixer.input({
 							channels: 2,
 							bitDepth: 16,
 							sampleRate: 48000,
 							volume: 100,
 							highWaterMark: 1
-						});
+						});*/
 
 						//audioStream.pipe(input);
-
+						const myshotstream = MySHOT.constructor(1);
+						audioStream.pipe(myshotstream);
+						console.log("starting ffmpeg");
 						//testing ffmpeg only
-						const ff2 = ffmpeg(audioStream)
+						const ff2 = ffmpeg(myshotstream)
 							.inputFormat("s16le")
 						// .audioChannels(2)
 							.inputOptions("-ac 2")
@@ -108,15 +133,15 @@ client.on("message", async message => {
 							.outputOptions("-af apad=pad_len=100k")
 							.output("suprise mothafucka!")
 							.run();
-
-						speakingUsers[user.id] = input;
+						console.log("ffmpeg command done");
+						// speakingUsers[user.id] = input;
 					} else {
-						console.log("bingbingbongbong");
-						const input = speakingUsers[user.id];
+						console.log("stopped speaking bingbingbongbong");
+						/* const input = speakingUsers[user.id];
 						if (input) {
 							mixer.removeInput(input);
 						}
-						speakingUsers[user.id] = undefined;
+						speakingUsers[user.id] = undefined;*/
 					}
 				});
 				/*const ff2 = ffmpeg(mixer)
