@@ -8,7 +8,7 @@ const AudioMixer = require("audio-mixer");
 const { SilenceStream } = require("./silence_stream");
 
 class MySHOT extends Duplex {
-	constructor({highWaterMark, ...options}) {
+	constructor({highWaterMark}) {
 		super({
 			highWaterMark,
 			autoDestroy: true,
@@ -127,7 +127,7 @@ client.on("message", async message => {
 						});*/
 
 						//audioStream.pipe(input);
-						const myshotstream = MySHOT.constructor(1);
+						const myshotstream = MySHOT.constructor({highWaterMark: 1});
 						audioStream.pipe(myshotstream);
 						console.log("starting ffmpeg");
 						//testing ffmpeg only
